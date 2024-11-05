@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
@@ -31,24 +31,22 @@ function App() {
     "Julai", "Ogos", "September", "Oktober", "November", "Disember"
   ];
 
-  // Load bookings dari Firebase
+  // Load bookings from Firebase
   useEffect(() => {
+    const loadBookings = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "bookings"));
+        const loadedBookings = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setBookings(loadedBookings);
+      } catch (error) {
+        console.error("Error loading bookings:", error);
+      }
+    };
     loadBookings();
   }, [selectedMonth, selectedYear]);
-
-  async function loadBookings() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "bookings"));
-      const bookingList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setBookings(bookingList);
-    } catch (error) {
-      console.error("Error loading bookings:", error);
-      alert("Error loading bookings!");
-    }
-  }
 
   const formatTime = (time) => {
     const [hours, minutes] = time.split(':');
@@ -94,9 +92,7 @@ function App() {
 
     try {
       await addDoc(collection(db, "bookings"), submitData);
-      await loadBookings(); // Reload bookings
 
-      // Reset form
       setFormData({
         name: '',
         phone: '',
@@ -113,6 +109,15 @@ function App() {
       setEndTime('');
 
       alert('Tempahan berjaya disimpan!');
+      
+      // Reload bookings
+      const querySnapshot = await getDocs(collection(db, "bookings"));
+      const loadedBookings = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBookings(loadedBookings);
+      
     } catch (error) {
       console.error("Error saving booking:", error);
       alert("Error saving booking!");
@@ -140,7 +145,15 @@ function App() {
     if (window.confirm('Adakah anda pasti untuk padam tempahan ini?')) {
       try {
         await deleteDoc(doc(db, "bookings", id));
-        await loadBookings(); // Reload bookings
+        
+        // Reload bookings
+        const querySnapshot = await getDocs(collection(db, "bookings"));
+        const loadedBookings = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setBookings(loadedBookings);
+        
       } catch (error) {
         console.error("Error deleting booking:", error);
         alert("Error deleting booking!");
@@ -151,13 +164,12 @@ function App() {
   return (
     <div className="min-h-screen bg-white p-8">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg">
-        {/* Form section - sama seperti sebelumnya */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-center mb-6">MAKLUMAT PELANGGAN</h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* ... semua input fields sama seperti sebelumnya ... */}
-            {/* Hanya perlu copy semua form elements dari code asal */}
+            {/* Your existing form JSX */}
+            {/* ... */}
           </form>
 
           <div className="mt-8">
