@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 
-
-
 function App() {
   const [formData, setFormData] = useState({
     name: '',
@@ -361,113 +359,35 @@ const handleReset = () => {
               </button>
             </div>
           </form>
-		  
-
 
           {/* Senarai Tempahan */}
 		  
-     <div className="mt-8">
-  <div className="flex items-center justify-between mb-4">
-    <h3 className="font-bold">Senarai Tempahan</h3>
-    <div className="flex gap-2">
-      <select 
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}
-        className="border rounded px-2 py-1"
-      >
-        <option value="all">Semua</option>
-        <option value="Pending">Pending</option>
-        <option value="Completed">Completed</option>
-      </select>
-      <select 
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-        className="border rounded px-2 py-1"
-      >
-        {months.map((month, index) => (
-          <option key={index} value={index}>{month}</option>
-        ))}
-      </select>
-      <select
-        value={selectedYear}
-        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-        className="border rounded px-2 py-1"
-      >
-        {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
-          <option key={year} value={year}>{year}</option>
-        ))}
-      </select>
-    </div>
-  </div>
-
-  <div className="space-y-4">
-    {JSON.parse(localStorage.getItem('bookings') || '[]')
-      .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
-      .filter(booking => {
-        const bookingDate = new Date(booking.startDate);
-        return (statusFilter === 'all' || booking.status === statusFilter) &&
-               bookingDate.getMonth() === selectedMonth &&
-               bookingDate.getFullYear() === selectedYear;
-      })
-      .map(booking => (
-        <div 
-          key={booking.id} 
-          className={`border p-4 rounded-lg relative hover:shadow-md ${
-            booking.status === 'Completed' ? 'bg-green-50' : 'bg-yellow-50'
-          }`}
-        >
-          <div className="mb-2">
-            <div className="flex justify-between items-start">
-              <p className="font-bold text-2xl">{booking.name}</p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => toggleStatus(booking.id)}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    booking.status === 'Completed' 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-yellow-500 text-white'
-                  }`}
-                >
-                  {booking.status}
-                </button>
-                <button 
-                  onClick={() => handleDelete(booking.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600"
-                >
-                  ✕
-                </button>
-              </div>
+          <div className="mt-8">
+            <h3 className="font-bold">Senarai Tempahan</h3>
+            <div className="space-y-4">
+              {JSON.parse(localStorage.getItem('bookings') || '[]')
+                .filter(booking => (statusFilter === 'all' || booking.status === statusFilter))
+                .map((booking) => (
+                  <div key={booking.id} className="border p-4 rounded-lg relative hover:shadow-md">
+				  <p>No. Order: {booking.orderNumber}</p> {/* Tambahkan No. Order */}
+                    <p><strong>Nama:</strong> {booking.name}</p>
+                    <p><strong>No. Telefon:</strong> {booking.phone}</p>
+                    <p><strong>Alamat:</strong> {booking.address}, {booking.postcode}, {booking.state}</p>
+					<div className="text-gray-600 text-sm mb-2">
+						<p>Dari: {new Date(booking.startDate).toLocaleDateString('en-GB')} {formatTime(booking.startTime)}</p>
+						<p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
+					</div>
+                    <p><strong>Jumlah:</strong> RM {booking.amount}</p>
+                    <p><strong>Deposit:</strong> RM {booking.deposit}</p>
+                    <p><strong>Balance:</strong> RM {Math.round(booking.balance)}</p>
+					
+                    <button onClick={() => generateInvoice(booking)} className="bg-blue-500 text-white px-2 py-1 rounded mt-2">
+                      Download PDF
+                    </button>
+                  </div>
+                ))}
             </div>
-            <p>No. Order: {booking.orderNumber}</p>
-            <p>No. Telefon: {booking.phone}</p>
-            <p>Unit: {booking.unit}</p>
-            <p>Alamat: {booking.address}, {booking.postcode}, {booking.state}</p>
-            <div className="text-gray-600 text-sm mb-2">
-              <p>Dari: {new Date(booking.startDate).toLocaleDateString('en-GB')} {formatTime(booking.startTime)}</p>
-              <p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
-            </div>
-            <p className="text-blue-600">Jumlah: RM {booking.amount}</p>
-            <p className="text-green-600">Deposit: RM {booking.deposit}</p>
-            <p className="text-red-600">Balance: RM {Math.round(booking.balance)}</p>
-            {booking.notes && (
-              <div className="mt-2 text-gray-600">
-                <p className="font-semibold">Nota:</p>
-                <p className="italic">{booking.notes}</p>
-              </div>
-            )}
-            {/* Download PDF Button */}
-            <button 
-              onClick={() => generateInvoice(booking)} 
-              className="bg-blue-500 text-white px-2 py-1 rounded mt-2"
-            >
-              Download PDF
-            </button>
           </div>
-        </div>
-      ))}
-  </div>
-</div>
-
         </div>
       </div>
     </div>
