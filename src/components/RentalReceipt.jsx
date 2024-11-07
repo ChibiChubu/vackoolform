@@ -16,20 +16,21 @@ export const RentalReceipt = ({ orderData }) => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      // Sesuaikan imej ke saiz PDF untuk muat dalam satu halaman
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${orderData.orderNumber}.pdf`);
     });
   };
 
-  // Gunakan efek ini untuk muat turun PDF secara automatik
-  React.useEffect(() => {
+  const handleDownloadAndWhatsApp = () => {
+    // Buka WhatsApp Web dengan nombor yang ditetapkan
+    window.open("https://wa.me/60169694840", "_blank");
+
+    // Muat turun PDF
     downloadPDF();
-  }, []);
+  };
 
   return (
     <div ref={receiptRef} className="max-w-xl mx-auto bg-white rounded-lg p-8 text-gray-800">
-      {/* Header with Right-aligned Logo */}
       <div className="flex items-start gap-6 mb-6">
         <img 
           src={logo}
@@ -39,9 +40,12 @@ export const RentalReceipt = ({ orderData }) => {
         <div>
           <h2 className="text-lg font-semibold">Vackool Enterprise</h2>
           <p className="text-xs text-gray-500">(003499862-P)</p>
-          <p className="text-xs text-blue-600">
-            WhatsApp <a href="https://wa.me/60169694840" target="_blank" rel="noopener noreferrer">60169694840</a>
-          </p>
+          <button 
+            onClick={handleDownloadAndWhatsApp} 
+            className="text-xs text-blue-600 underline cursor-pointer"
+          >
+            WhatsApp 60169694840
+          </button>
         </div>
       </div>
 
