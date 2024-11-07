@@ -25,16 +25,19 @@ const generateInvoice = (booking) => {
     const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
     root.render(<RentalReceipt orderData={booking} />);
 
-    // Print after content loads
-    printWindow.document.close();
-    printWindow.onload = function() {
-      printWindow.print();
-      printWindow.onafterprint = function() {
-        printWindow.close();
+    // Tunggu beberapa saat untuk memastikan kandungan dimuat sepenuhnya
+    setTimeout(() => {
+      printWindow.document.close(); // Tutup dokumen
+      printWindow.onload = function() {
+        printWindow.print(); // Cetak PDF
+        printWindow.onafterprint = function() {
+          printWindow.close(); // Tutup tetingkap selepas cetakan selesai
+        };
       };
-    };
+    }, 1000); // Penangguhan 1 saat untuk memberikan masa kandungan dimuat
   }
 };
+
 
 
 function App() {
@@ -97,16 +100,16 @@ function App() {
     return;
   }
 
-  const submitData = {
-    ...formData,
-    orderNumber: `ORD-${Date.now()}`,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-    startTime,
-    endTime,
-    createdAt: new Date().toISOString(), // Simpan tarikh semasa tempahan dibuat
-    status: 'Pending'
-  };
+   const submitData = {
+      ...formData,
+      orderNumber: `ORD-${Date.now()}`,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      startTime,
+      endTime,
+      createdAt: new Date().toISOString(), // Tarikh pendaftaran
+      status: 'Pending'
+    };
 
   const existingData = JSON.parse(localStorage.getItem('bookings') || '[]');
   existingData.push({
@@ -497,7 +500,7 @@ const generateInvoice = (booking) => {
             <p className="text-green-600">
   Deposit: RM {booking.deposit} 
   <span className="text-gray-500 ml-2">
-    ({format(new Date(), 'iiii, dd MMMM yyyy h:mm a')})
+   ({format(new Date(booking.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
   </span>
 </p>
 
