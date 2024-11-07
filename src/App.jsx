@@ -1,6 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
+import { RentalReceipt } from './components/RentalReceipt';
+import ReactDOM from 'react-dom/client';
+import { format } from 'date-fns';
 
+
+const generateInvoice = (booking) => {
+  const printWindow = window.open('', '_blank');
+  
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice - ${booking.orderNumber}</title>
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        </head>
+        <body>
+          <div id="receipt"></div>
+        </body>
+      </html>
+    `);
+
+    // Render receipt in new window
+    const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
+    root.render(<RentalReceipt orderData={booking} />);
+
+    // Print after content loads
+    printWindow.document.close();
+    printWindow.onload = function() {
+      printWindow.print();
+      printWindow.onafterprint = function() {
+        printWindow.close();
+      };
+    };
+  }
+};
 
 
 function App() {
@@ -56,51 +90,52 @@ function App() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!startDate || !endDate || !startTime || !endTime) {
-      alert('Sila pilih tarikh dan masa mula dan tamat');
-      return;
-    }
+ const handleSubmit = (e) => {
+  e.preventDefault();
+  if (!startDate || !endDate || !startTime || !endTime) {
+    alert('Sila pilih tarikh dan masa mula dan tamat');
+    return;
+  }
 
-    const submitData = {
-      ...formData,
-      orderNumber: `ORD-${Date.now()}`,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      startTime,
-      endTime,
-      status: 'Pending'
-    };
-
-    const existingData = JSON.parse(localStorage.getItem('bookings') || '[]');
-    existingData.push({
-      id: Date.now(),
-      ...submitData,
-      createdAt: new Date().toISOString()
-    });
-    localStorage.setItem('bookings', JSON.stringify(existingData));
-
-    setFormData({
-      name: '',
-      phone: '',
-      amount: '',
-      unit: '',
-      deposit: '',
-      balance: '',
-      address: '',
-      postcode: '',
-      state: '',
-      notes: '',
-      status: 'Pending'
-    });
-    setStartDate(null);
-    setEndDate(null);
-    setStartTime('');
-    setEndTime('');
-
-    alert('Tempahan berjaya disimpan!');
+  const submitData = {
+    ...formData,
+    orderNumber: `ORD-${Date.now()}`,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    startTime,
+    endTime,
+    createdAt: new Date().toISOString(), // Simpan tarikh semasa tempahan dibuat
+    status: 'Pending'
   };
+
+  const existingData = JSON.parse(localStorage.getItem('bookings') || '[]');
+  existingData.push({
+    id: Date.now(),
+    ...submitData,
+  });
+  localStorage.setItem('bookings', JSON.stringify(existingData));
+
+  setFormData({
+    name: '',
+    phone: '',
+    amount: '',
+    unit: '',
+    deposit: '',
+    balance: '',
+    address: '',
+    postcode: '',
+    state: '',
+    notes: '',
+    status: 'Pending'
+  });
+  setStartDate(null);
+  setEndDate(null);
+  setStartTime('');
+  setEndTime('');
+
+  alert('Tempahan berjaya disimpan!');
+};
+
 
   const handleDelete = (id) => {
     if (window.confirm('Adakah anda pasti untuk padam tempahan ini?')) {
@@ -144,25 +179,45 @@ const handleReset = () => {
     setFormData(prev => ({...prev}));
   };
 
-  const generateInvoice = (booking) => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Invois Tempahan', 10, 10);
-    doc.setFontSize(12);
-    doc.text(`Order ID: ${booking.orderNumber}`, 10, 20);
-    doc.text(`Nama: ${booking.name}`, 10, 30);
-    doc.text(`No. Telefon: ${booking.phone}`, 10, 40);
-    doc.text(`Alamat: ${booking.address}, ${booking.postcode}, ${booking.state}`, 10, 50);
-    doc.text(`Jumlah: RM ${booking.amount}`, 10, 60);
-    doc.text(`Deposit: RM ${booking.deposit}`, 10, 70);
-    doc.text(`Balance: RM ${booking.balance}`, 10, 80);
-    doc.text(`Tarikh Mula: ${new Date(booking.startDate).toLocaleDateString('en-GB')} ${formatTime(booking.startTime)}`, 10, 90);
-    doc.text(`Tarikh Tamat: ${new Date(booking.endDate).toLocaleDateString('en-GB')} ${formatTime(booking.endTime)}`, 10, 100);
-    if (booking.notes) {
-      doc.text(`Nota: ${booking.notes}`, 10, 110);
-    }
-    doc.save(`Invoice_${booking.name}.pdf`);
-  };
+const generateInvoice = (booking) => {
+  const printWindow = window.open('', '_blank');
+  
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice - ${booking.orderNumber}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @media print {
+              body {
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+          <div id="receipt"></div>
+        </body>
+      </html>
+    `);
+
+    // Render receipt in new window
+    const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
+    root.render(<RentalReceipt orderData={booking} />);
+
+    // Print after content loads
+    printWindow.document.close();
+    printWindow.onload = function() {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.onafterprint = function() {
+          printWindow.close();
+        };
+      }, 1000); // Small delay to ensure styles are loaded
+    };
+  }
+};
 
   return (
     <div className="min-h-screen bg-white p-8">
@@ -447,7 +502,14 @@ const handleReset = () => {
               <p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
             </div>
             <p className="text-blue-600">Jumlah: RM {booking.amount}</p>
-            <p className="text-green-600">Deposit: RM {booking.deposit}</p>
+            <p className="text-green-600">
+  Deposit: RM {booking.deposit} 
+  <span className="text-gray-500 ml-2">
+    ({format(new Date(booking.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
+  </span>
+</p>
+
+
             <p className="text-red-600">Balance: RM {Math.round(booking.balance)}</p>
             {booking.notes && (
               <div className="mt-2 text-gray-600">

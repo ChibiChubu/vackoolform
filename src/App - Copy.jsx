@@ -1,4 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import { RentalReceipt } from './components/RentalReceipt';
+import ReactDOM from 'react-dom/client';
+import { format } from 'date-fns';
+
+
+const generateInvoice = (booking) => {
+  const printWindow = window.open('', '_blank');
+  
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice - ${booking.orderNumber}</title>
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        </head>
+        <body>
+          <div id="receipt"></div>
+        </body>
+      </html>
+    `);
+
+    // Render receipt in new window
+    const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
+    root.render(<RentalReceipt orderData={booking} />);
+
+    // Print after content loads
+    printWindow.document.close();
+    printWindow.onload = function() {
+      printWindow.print();
+      printWindow.onafterprint = function() {
+        printWindow.close();
+      };
+    };
+  }
+};
+
 
 function App() {
   const [formData, setFormData] = useState({
@@ -9,10 +46,10 @@ function App() {
     deposit: '',
     balance: '',
     address: '',
-	postcode: '', // Poskod baru
-	state: '',    // Negeri baru
+    postcode: '',
+    state: '',
     notes: '',
-    status: 'Pending' // Add default status
+    status: 'Pending'
   });
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -20,7 +57,7 @@ function App() {
   const [endTime, setEndTime] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [statusFilter, setStatusFilter] = useState('all'); // Add status filter
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const months = [
     "Januari", "Februari", "Mac", "April", "Mei", "Jun",
@@ -53,7 +90,7 @@ function App() {
     }));
   };
 
-const handleSubmit = (e) => {
+ const handleSubmit = (e) => {
   e.preventDefault();
   if (!startDate || !endDate || !startTime || !endTime) {
     alert('Sila pilih tarikh dan masa mula dan tamat');
@@ -62,11 +99,12 @@ const handleSubmit = (e) => {
 
   const submitData = {
     ...formData,
-    orderNumber: `ORD-${Date.now()}`, // No. Order automatik
+    orderNumber: `ORD-${Date.now()}`,
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     startTime,
     endTime,
+    createdAt: new Date().toISOString(), // Simpan tarikh semasa tempahan dibuat
     status: 'Pending'
   };
 
@@ -74,11 +112,9 @@ const handleSubmit = (e) => {
   existingData.push({
     id: Date.now(),
     ...submitData,
-    createdAt: new Date().toISOString()
   });
   localStorage.setItem('bookings', JSON.stringify(existingData));
 
-  // Reset form
   setFormData({
     name: '',
     phone: '',
@@ -110,7 +146,7 @@ const handleSubmit = (e) => {
     }
   };
 
-  const handleReset = () => {
+const handleReset = () => {
     setFormData({
       name: '',
       phone: '',
@@ -140,8 +176,48 @@ const handleSubmit = (e) => {
       return booking;
     });
     localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-    setFormData(prev => ({...prev})); // Trigger re-render
+    setFormData(prev => ({...prev}));
   };
+
+const generateInvoice = (booking) => {
+  const printWindow = window.open('', '_blank');
+  
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice - ${booking.orderNumber}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @media print {
+              body {
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+          <div id="receipt"></div>
+        </body>
+      </html>
+    `);
+
+    // Render receipt in new window
+    const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
+    root.render(<RentalReceipt orderData={booking} />);
+
+    // Print after content loads
+    printWindow.document.close();
+    printWindow.onload = function() {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.onafterprint = function() {
+          printWindow.close();
+        };
+      }, 1000); // Small delay to ensure styles are loaded
+    };
+  }
+};
 
   return (
     <div className="min-h-screen bg-white p-8">
@@ -149,6 +225,7 @@ const handleSubmit = (e) => {
         <div className="p-6">
           <h2 className="text-xl font-bold text-center mb-6">MAKLUMAT PELANGGAN</h2>
           
+          {/* Kod UI asal untuk form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
@@ -162,7 +239,7 @@ const handleSubmit = (e) => {
               />
             </div>
 
-            <div>
+           <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">No. Telefon</label>
               <input 
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -320,7 +397,7 @@ const handleSubmit = (e) => {
                 placeholder="Masukkan nota tambahan"
               />
             </div>
-
+            
             <div className="flex gap-4">
               <button 
                 type="submit" 
@@ -330,109 +407,129 @@ const handleSubmit = (e) => {
               </button>
               <button 
                 type="button"
-                onClick={handleReset}
+                onClick={() => setFormData({
+                  name: '', phone: '', amount: '', unit: '', deposit: '', balance: '', address: '', postcode: '', state: '', notes: '', status: 'Pending'
+                })}
                 className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Padamkan
               </button>
             </div>
           </form>
+		  
 
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold">Senarai Tempahan</h3>
+
+          {/* Senarai Tempahan */}
+		  
+     <div className="mt-8">
+  <div className="flex items-center justify-between mb-4">
+    <h3 className="font-bold">Senarai Tempahan</h3>
+    <div className="flex gap-2">
+      <select 
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+        className="border rounded px-2 py-1"
+      >
+        <option value="all">Semua</option>
+        <option value="Pending">Pending</option>
+        <option value="Completed">Completed</option>
+      </select>
+      <select 
+        value={selectedMonth}
+        onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+        className="border rounded px-2 py-1"
+      >
+        {months.map((month, index) => (
+          <option key={index} value={index}>{month}</option>
+        ))}
+      </select>
+      <select
+        value={selectedYear}
+        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+        className="border rounded px-2 py-1"
+      >
+        {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
+          <option key={year} value={year}>{year}</option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <div className="space-y-4">
+    {JSON.parse(localStorage.getItem('bookings') || '[]')
+      .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+      .filter(booking => {
+        const bookingDate = new Date(booking.startDate);
+        return (statusFilter === 'all' || booking.status === statusFilter) &&
+               bookingDate.getMonth() === selectedMonth &&
+               bookingDate.getFullYear() === selectedYear;
+      })
+      .map(booking => (
+        <div 
+          key={booking.id} 
+          className={`border p-4 rounded-lg relative hover:shadow-md ${
+            booking.status === 'Completed' ? 'bg-green-50' : 'bg-yellow-50'
+          }`}
+        >
+          <div className="mb-2">
+            <div className="flex justify-between items-start">
+              <p className="font-bold text-2xl">{booking.name}</p>
               <div className="flex gap-2">
-                <select 
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border rounded px-2 py-1"
+                <button 
+                  onClick={() => toggleStatus(booking.id)}
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    booking.status === 'Completed' 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-yellow-500 text-white'
+                  }`}
                 >
-                  <option value="all">Semua</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Completed">Completed</option>
-                </select>
-                <select 
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                  className="border rounded px-2 py-1"
+                  {booking.status}
+                </button>
+                <button 
+                  onClick={() => handleDelete(booking.id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600"
                 >
-                  {months.map((month, index) => (
-                    <option key={index} value={index}>{month}</option>
-                  ))}
-                </select>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="border rounded px-2 py-1"
-                >
-                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
+                  ✕
+                </button>
               </div>
             </div>
-            
-            <div className="space-y-4">
-              {JSON.parse(localStorage.getItem('bookings') || '[]')
-                .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
-                .filter(booking => {
-                  const bookingDate = new Date(booking.startDate);
-                  return (statusFilter === 'all' || booking.status === statusFilter) &&
-                         bookingDate.getMonth() === selectedMonth &&
-                         bookingDate.getFullYear() === selectedYear;
-                })
-                .map(booking => (
-                  <div 
-                    key={booking.id} 
-                    className={`border p-4 rounded-lg relative hover:shadow-md ${
-                      booking.status === 'Completed' ? 'bg-green-50' : 'bg-yellow-50'
-                    }`}
-                  >
-        <div className="mb-2">
-  <div className="flex justify-between items-start">
-    <p className="font-bold text-2xl">{booking.name}</p>
-    <div className="flex gap-2">
-      <button 
-        onClick={() => toggleStatus(booking.id)}
-        className={`px-3 py-1 rounded-full text-sm ${
-          booking.status === 'Completed' 
-            ? 'bg-green-500 text-white' 
-            : 'bg-yellow-500 text-white'
-        }`}
-      >
-        {booking.status}
-      </button>
-      <button 
-        onClick={() => handleDelete(booking.id)}
-        className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600"
-      >
-        ✕
-      </button>
-    </div>
+            <p>No. Order: {booking.orderNumber}</p>
+            <p>No. Telefon: {booking.phone}</p>
+            <p>Unit: {booking.unit}</p>
+            <p>Alamat: {booking.address}, {booking.postcode}, {booking.state}</p>
+            <div className="text-gray-600 text-sm mb-2">
+              <p>Dari: {new Date(booking.startDate).toLocaleDateString('en-GB')} {formatTime(booking.startTime)}</p>
+              <p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
+            </div>
+            <p className="text-blue-600">Jumlah: RM {booking.amount}</p>
+            <p className="text-green-600">
+  Deposit: RM {booking.deposit} 
+  <span className="text-gray-500 ml-2">
+    ({format(new Date(booking.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
+  </span>
+</p>
+
+
+            <p className="text-red-600">Balance: RM {Math.round(booking.balance)}</p>
+            {booking.notes && (
+              <div className="mt-2 text-gray-600">
+                <p className="font-semibold">Nota:</p>
+                <p className="italic">{booking.notes}</p>
+              </div>
+            )}
+            {/* Download PDF Button */}
+            <button 
+              onClick={() => generateInvoice(booking)} 
+              className="bg-blue-500 text-white px-2 py-1 rounded mt-2"
+            >
+              Download PDF
+            </button>
+          </div>
+        </div>
+      ))}
   </div>
-  <p>No. Order: {booking.orderNumber}</p> {/* Tambahkan No. Order */}
-  <p>No. Telefon: {booking.phone}</p>
-  <p>Unit: {booking.unit}</p>
-  <p>Alamat: {booking.address}, {booking.postcode}, {booking.state}</p>
-  <div className="text-gray-600 text-sm mb-2">
-    <p>Dari: {new Date(booking.startDate).toLocaleDateString('en-GB')} {formatTime(booking.startTime)}</p>
-    <p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
-  </div>
-  <p className="text-blue-600">Jumlah: RM {booking.amount}</p>
-  <p className="text-green-600">Deposit: RM {booking.deposit}</p>
-  <p className="text-red-600">Balance: RM {Math.round(booking.balance)}</p>
-  {booking.notes && (
-    <div className="mt-2 text-gray-600">
-      <p className="font-semibold">Nota:</p>
-      <p className="italic">{booking.notes}</p>
-    </div>
-  )}
 </div>
 
-                  </div>
-                ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
