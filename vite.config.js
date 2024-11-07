@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: 'ChibiChubu/vackoolform/' // Gantikan dengan nama repositori anda
+  base: '/vackoolform/' // Pastikan ini sesuai dengan nama repositori GitHub anda
 });
