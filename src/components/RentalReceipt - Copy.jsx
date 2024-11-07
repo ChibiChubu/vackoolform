@@ -1,25 +1,41 @@
-// src/components/RentalReceipt.jsx
-import React from 'react';
-import logo from '../images/logo.png'; 
+import React, { useRef } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import logo from '../images/logo.png';
 import { format } from 'date-fns';
 
-
 export const RentalReceipt = ({ orderData }) => {
+  const receiptRef = useRef();
+
+  const downloadPDF = () => {
+    const input = receiptRef.current;
+    html2canvas(input, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      // Sesuaikan imej ke saiz PDF, pastikan ia muat dalam satu halaman
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${orderData.orderNumber}.pdf`);
+    });
+  };
+
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-lg p-8">
+    <div ref={receiptRef} className="max-w-xl mx-auto bg-white rounded-lg p-8">
       {/* Header with Right-aligned Logo */}
- <div className="flex items-start gap-6 mb-8">
-  <img 
-    src={logo}
-    alt="Vackool Enterprise"
-    className="w-20 h-20 object-contain"
-  />
-  <div>
-    <h2 className="text-lg font-medium">Vackool Enterprise</h2>
-    <p className="text-sm text-gray-500">(003499862-P)</p>
-    <p className="text-sm text-gray-500">60169694840</p>
-  </div>
-</div>
+      <div className="flex items-start gap-6 mb-8">
+        <img 
+          src={logo}
+          alt="Vackool Enterprise"
+          className="w-20 h-20 object-contain"
+        />
+        <div>
+          <h2 className="text-lg font-medium">Vackool Enterprise</h2>
+          <p className="text-xs text-gray-500">(003499862-P)</p>
+          <p className="text-sm text-blue-500">Whatapps 60169694840</p>
+        </div>
+      </div>
 
       {/* Order ID with Status Tags */}
       <div className="bg-gray-50 p-4 rounded-md mb-6">
@@ -33,12 +49,11 @@ export const RentalReceipt = ({ orderData }) => {
       {/* Date & Time Slot */}
       <div className="mb-6">
         <h3 className="text-sm font-medium mb-2">Date & Time Slot</h3>
-      <p className="text-sm">
-  {format(new Date(orderData.startDate), 'iiii, dd MMMM yyyy h:mm a')}
-  <br />
-  {format(new Date(orderData.endDate), 'iiii, dd MMMM yyyy h:mm a')}
-</p>
-
+        <p className="text-sm">
+          {format(new Date(orderData.startDate), 'iiii, dd MMMM yyyy h:mm a')}
+          <br />
+          {format(new Date(orderData.endDate), 'iiii, dd MMMM yyyy h:mm a')}
+        </p>
       </div>
 
       {/* Name */}
@@ -63,19 +78,19 @@ export const RentalReceipt = ({ orderData }) => {
       <div className="mb-6">
         <h3 className="text-sm font-medium mb-2">Payment Details</h3>
         <div className="space-y-2 text-xs">
-  <div className="flex justify-between">
-    <span>Amount:</span>
-    <span className="text-blue-600">RM {parseFloat(orderData.amount).toFixed(2)}</span>
-  </div>
-         <div className="flex justify-between items-center">
-    <span>
-      Deposit: 
-      <span className="text-gray-500 ml-2">
-        ({format(new Date(orderData.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
-      </span>
-    </span>
-    <span className="text-green-600">RM {parseFloat(orderData.deposit).toFixed(2)}</span>
-  </div>
+          <div className="flex justify-between">
+            <span>Amount:</span>
+            <span className="text-blue-600">RM {parseFloat(orderData.amount).toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>
+              Deposit: 
+              <span className="text-gray-500 ml-2">
+                ({format(new Date(orderData.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
+              </span>
+            </span>
+            <span className="text-green-600">RM {parseFloat(orderData.deposit).toFixed(2)}</span>
+          </div>
           <div className="flex justify-between">
             <span>Balance:</span>
             <span className="text-red-600">RM {parseFloat(orderData.balance).toFixed(2)}</span>
@@ -126,6 +141,14 @@ export const RentalReceipt = ({ orderData }) => {
       <div className="text-center text-sm text-gray-500 mt-8">
         Thank you for your business!
       </div>
+
+      {/* Download PDF Button */}
+      <button 
+        onClick={downloadPDF} 
+        className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+      >
+        Muat Turun PDF
+      </button>
     </div>
   );
 };
