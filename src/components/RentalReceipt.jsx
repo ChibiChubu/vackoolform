@@ -22,9 +22,7 @@ export const RentalReceipt = ({ orderData }) => {
   };
 
   const handleDownloadAndWhatsApp = () => {
-    // Buka WhatsApp Web dengan nombor yang ditetapkan
-    window.open("https://wa.me/60169694840", "_blank");
-
+   
     // Muat turun PDF
     downloadPDF();
   };
