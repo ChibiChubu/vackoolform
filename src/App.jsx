@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import jsPDF from 'jspdf';
-import { RentalReceipt } from './components/RentalReceipt';
-import ReactDOM from 'react-dom/client';
+import { db } from './firebase.js';
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
 import { format } from 'date-fns';
+import ReactDOM from 'react-dom/client';
+import { RentalReceipt } from './components/RentalReceipt';
 
 
 const generateInvoice = (booking) => {
@@ -39,7 +40,6 @@ const generateInvoice = (booking) => {
 };
 
 
-
 function App() {
   const [formData, setFormData] = useState({
     name: '',
@@ -54,6 +54,8 @@ function App() {
     notes: '',
     status: 'Pending'
   });
+  
+  const [bookings, setBookings] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [startTime, setStartTime] = useState('');
@@ -76,6 +78,22 @@ function App() {
     return `${hour12}:${minutes} ${ampm}`;
   };
 
+  const fetchBookings = async () => {
+    try {
+      const bookingsRef = collection(db, 'bookings');
+      const querySnapshot = await getDocs(bookingsRef);
+      const bookingsData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return bookingsData;
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      alert('Error fetching bookings');
+      return [];
+    }
+  };
+
   useEffect(() => {
     const amount = parseFloat(formData.amount) || 0;
     const deposit = parseFloat(formData.deposit) || 0;
@@ -93,63 +111,68 @@ function App() {
     }));
   };
 
- const handleSubmit = (e) => {
-  e.preventDefault();
-  if (!startDate || !endDate || !startTime || !endTime) {
-    alert('Sila pilih tarikh dan masa mula dan tamat');
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!startDate || !endDate || !startTime || !endTime) {
+      alert('Sila pilih tarikh dan masa mula dan tamat');
+      return;
+    }
 
-   const submitData = {
-      ...formData,
-      orderNumber: `ORD-${Date.now()}`,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      startTime,
-      endTime,
-      createdAt: new Date().toISOString(), // Tarikh pendaftaran
-      status: 'Pending'
-    };
+    try {
+      const submitData = {
+        ...formData,
+        orderNumber: `ORD-${Date.now()}`,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        startTime,
+        endTime,
+        createdAt: new Date().toISOString(),
+        status: 'Pending'
+      };
 
-  const existingData = JSON.parse(localStorage.getItem('bookings') || '[]');
-  existingData.push({
-    id: Date.now(),
-    ...submitData,
-  });
-  localStorage.setItem('bookings', JSON.stringify(existingData));
+      await addDoc(collection(db, 'bookings'), submitData);
+      
+      setFormData({
+        name: '',
+        phone: '',
+        amount: '',
+        unit: '',
+        deposit: '',
+        balance: '',
+        address: '',
+        postcode: '',
+        state: '',
+        notes: '',
+        status: 'Pending'
+      });
+      setStartDate(null);
+      setEndDate(null);
+      setStartTime('');
+      setEndTime('');
 
-  setFormData({
-    name: '',
-    phone: '',
-    amount: '',
-    unit: '',
-    deposit: '',
-    balance: '',
-    address: '',
-    postcode: '',
-    state: '',
-    notes: '',
-    status: 'Pending'
-  });
-  setStartDate(null);
-  setEndDate(null);
-  setStartTime('');
-  setEndTime('');
-
-  alert('Tempahan berjaya disimpan!');
-};
-
-
-  const handleDelete = (id) => {
-    if (window.confirm('Adakah anda pasti untuk padam tempahan ini?')) {
-      const currentBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-      const updatedBookings = currentBookings.filter(b => b.id !== id);
-      localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-      setFormData(prev => ({...prev}));
+      alert('Tempahan berjaya disimpan!');
+      const updatedBookings = await fetchBookings();
+      setBookings(updatedBookings);
+    } catch (error) {
+      console.error("Error adding booking:", error);
+      alert('Error saving booking');
     }
   };
 
-const handleReset = () => {
+  const handleDelete = async (id) => {
+    if (window.confirm('Adakah anda pasti untuk padam tempahan ini?')) {
+      try {
+        await deleteDoc(doc(db, 'bookings', id));
+        const updatedBookings = await fetchBookings();
+        setBookings(updatedBookings);
+      } catch (error) {
+        console.error("Error deleting booking:", error);
+        alert('Error deleting booking');
+      }
+    }
+  };
+
+  const handleReset = () => {
     setFormData({
       name: '',
       phone: '',
@@ -167,52 +190,75 @@ const handleReset = () => {
     setEndTime('');
   };
 
-  const toggleStatus = (bookingId) => {
-    const currentBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    const updatedBookings = currentBookings.map(booking => {
-      if (booking.id === bookingId) {
-        return {
-          ...booking,
-          status: booking.status === 'Pending' ? 'Completed' : 'Pending'
-        };
-      }
-      return booking;
-    });
-    localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-    setFormData(prev => ({...prev}));
+  const toggleStatus = async (bookingId, currentStatus) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      const newStatus = currentStatus === 'Pending' ? 'Completed' : 'Pending';
+      await updateDoc(bookingRef, {
+        status: newStatus
+      });
+      const updatedBookings = await fetchBookings();
+      setBookings(updatedBookings);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert('Error updating status');
+    }
   };
 
-const generateInvoice = (booking) => {
-  const printWindow = window.open('', '_blank');
-  
-  if (printWindow) {
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Invoice - ${booking.orderNumber}</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            @media print {
-              body {
-                padding: 20px;
+  const generateInvoice = (booking) => {
+    const printWindow = window.open('', '_blank');
+    
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Invoice - ${booking.orderNumber}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @media print {
+                body {
+                  padding: 20px;
+                }
               }
-            }
-          </style>
-        </head>
-        <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-          <div id="receipt"></div>
-        </body>
-      </html>
-    `);
+            </style>
+          </head>
+          <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+            <div id="receipt"></div>
+          </body>
+        </html>
+      `);
 
-    // Render receipt in new window
-    const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
-    root.render(<RentalReceipt orderData={booking} />);
+      const root = ReactDOM.createRoot(printWindow.document.getElementById('receipt'));
+      root.render(<RentalReceipt orderData={booking} />);
 
-    // Print after content loads
+      setTimeout(() => {
+        printWindow.document.close();
+        printWindow.onload = function() {
+          printWindow.print();
+          printWindow.onafterprint = function() {
+            printWindow.close();
+          };
+        };
+      }, 1000);
+    }
+  };
   
-  }
-};
+  
+
+  useEffect(() => {
+    const loadBookings = async () => {
+      const allBookings = await fetchBookings();
+      const filteredBookings = allBookings.filter(booking => {
+        const bookingDate = new Date(booking.startDate);
+        return (statusFilter === 'all' || booking.status === statusFilter) &&
+               bookingDate.getMonth() === selectedMonth &&
+               bookingDate.getFullYear() === selectedYear;
+      });
+      setBookings(filteredBookings);
+    };
+
+    loadBookings();
+  }, [selectedMonth, selectedYear, statusFilter]);
 
   return (
     <div className="min-h-screen bg-white p-8">
@@ -220,7 +266,6 @@ const generateInvoice = (booking) => {
         <div className="p-6">
           <h2 className="text-xl font-bold text-center mb-6">MAKLUMAT PELANGGAN</h2>
           
-          {/* Kod UI asal untuk form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
@@ -233,8 +278,7 @@ const generateInvoice = (booking) => {
                 required
               />
             </div>
-
-           <div>
+			 <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">No. Telefon</label>
               <input 
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -245,9 +289,8 @@ const generateInvoice = (booking) => {
                 required
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+			
+			<div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah (RM)</label>
                 <input 
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -260,7 +303,8 @@ const generateInvoice = (booking) => {
                   required
                 />
               </div>
-              <div>
+			  
+			  <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Unit Sewaan</label>
                 <input 
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -271,10 +315,8 @@ const generateInvoice = (booking) => {
                   required
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+			  
+			  <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Deposit (RM)</label>
                 <input 
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -287,7 +329,8 @@ const generateInvoice = (booking) => {
                   required
                 />
               </div>
-              <div>
+			  
+			<div>
   <label className="block text-sm font-medium text-gray-700 mb-1">Balance (RM)</label>
   <input 
     className="w-full px-3 py-2 border rounded-md bg-gray-50" 
@@ -295,11 +338,7 @@ const generateInvoice = (booking) => {
     readOnly 
   />
 </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div>
+			<div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tarikh Mula</label>
                   <input
                     type="date"
@@ -309,7 +348,7 @@ const generateInvoice = (booking) => {
                     required
                   />
                 </div>
-                <div>
+			<div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Masa Mula</label>
                   <input 
                     type="time"
@@ -319,9 +358,7 @@ const generateInvoice = (booking) => {
                     required
                   />
                 </div>
-              </div>
-              <div className="space-y-4">
-                <div>
+			<div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tarikh Tamat</label>
                   <input
                     type="date"
@@ -331,7 +368,7 @@ const generateInvoice = (booking) => {
                     required
                   />
                 </div>
-                <div>
+			<div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Masa Tamat</label>
                   <input 
                     type="time"
@@ -341,10 +378,7 @@ const generateInvoice = (booking) => {
                     required
                   />
                 </div>
-              </div>
-            </div>
-
-            <div>
+				<div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
               <input 
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -355,8 +389,6 @@ const generateInvoice = (booking) => {
                 required
               />
             </div>
-			
-		<div className="grid grid-cols-2 gap-4">
 			<div>
 			<label className="block text-sm font-medium text-gray-700 mb-1">Poskod</label>
 			<input 
@@ -368,8 +400,7 @@ const generateInvoice = (booking) => {
 				required
 			/>
 		</div>
-  
-		<div>
+	<div>
 			<label className="block text-sm font-medium text-gray-700 mb-1">Negeri</label>
 			<input 
 				className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -380,9 +411,7 @@ const generateInvoice = (booking) => {
 				required
 			/>
 		</div>
-		</div>
-
-            <div>
+				<div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
               <textarea 
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
@@ -392,8 +421,7 @@ const generateInvoice = (booking) => {
                 placeholder="Masukkan nota tambahan"
               />
             </div>
-            
-            <div className="flex gap-4">
+			<div className="flex gap-4">
               <button 
                 type="submit" 
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -409,15 +437,13 @@ const generateInvoice = (booking) => {
               >
                 Padamkan
               </button>
-            </div>
+            </div>	
           </form>
-		  
 
 
-          {/* Senarai Tempahan */}
-		  
-     <div className="mt-8">
-  <div className="flex items-center justify-between mb-4">
+
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
     <h3 className="font-bold">Senarai Tempahan</h3>
     <div className="flex gap-2">
       <select 
@@ -448,82 +474,83 @@ const generateInvoice = (booking) => {
         ))}
       </select>
     </div>
-  </div>
-
-  <div className="space-y-4">
-    {JSON.parse(localStorage.getItem('bookings') || '[]')
-      .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
-      .filter(booking => {
-        const bookingDate = new Date(booking.startDate);
-        return (statusFilter === 'all' || booking.status === statusFilter) &&
-               bookingDate.getMonth() === selectedMonth &&
-               bookingDate.getFullYear() === selectedYear;
-      })
-      .map(booking => (
-        <div 
-          key={booking.id} 
-          className={`border p-4 rounded-lg relative hover:shadow-md ${
-            booking.status === 'Completed' ? 'bg-green-50' : 'bg-yellow-50'
-          }`}
-        >
-          <div className="mb-2">
-            <div className="flex justify-between items-start">
-              <p className="font-bold text-2xl">{booking.name}</p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => toggleStatus(booking.id)}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    booking.status === 'Completed' 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-yellow-500 text-white'
-                  }`}
-                >
-                  {booking.status}
-                </button>
-                <button 
-                  onClick={() => handleDelete(booking.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600"
-                >
-                  ✕
-                </button>
-              </div>
+  </div> 
+			
+			<div className="space-y-4">
+  {bookings  // Guna bookings state instead of localStorage
+    .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+    .filter(booking => {
+      const bookingDate = new Date(booking.startDate);
+      return (statusFilter === 'all' || booking.status === statusFilter) &&
+             bookingDate.getMonth() === selectedMonth &&
+             bookingDate.getFullYear() === selectedYear;
+    })
+    .map(booking => (
+      <div 
+        key={booking.id} 
+        className={`border p-4 rounded-lg relative hover:shadow-md ${
+          booking.status === 'Completed' ? 'bg-green-50' : 'bg-yellow-50'
+        }`}
+      >
+        <div className="mb-2">
+          <div className="flex justify-between items-start">
+            <p className="font-bold text-2xl">{booking.name}</p>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => toggleStatus(booking.id, booking.status)}  // Pass current status
+                className={`px-3 py-1 rounded-full text-sm ${
+                  booking.status === 'Completed' 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-yellow-500 text-white'
+                }`}
+              >
+                {booking.status}
+              </button>
+              <button 
+                onClick={() => handleDelete(booking.id)}
+                className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600"
+              >
+                ✕
+              </button>
             </div>
-            <p>No. Order: {booking.orderNumber}</p>
-            <p>No. Telefon: {booking.phone}</p>
-            <p>Unit: {booking.unit}</p>
-            <p>Alamat: {booking.address}, {booking.postcode}, {booking.state}</p>
-            <div className="text-gray-600 text-sm mb-2">
-              <p>Dari: {new Date(booking.startDate).toLocaleDateString('en-GB')} {formatTime(booking.startTime)}</p>
-              <p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
-            </div>
-            <p className="text-blue-600">Jumlah: RM {booking.amount}</p>
-            <p className="text-green-600">
-  Deposit: RM {booking.deposit} 
-  <span className="text-gray-500 ml-2">
-   ({format(new Date(booking.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
-  </span>
-</p>
-
-            <p className="text-red-600">Balance: RM {Math.round(booking.balance)}</p>
-            {booking.notes && (
-              <div className="mt-2 text-gray-600">
-                <p className="font-semibold">Nota:</p>
-                <p className="italic">{booking.notes}</p>
-              </div>
-            )}
-            {/* Download PDF Button */}
-            <button 
-              onClick={() => generateInvoice(booking)} 
-              className="bg-blue-500 text-white px-2 py-1 rounded mt-2"
-            >
-              Download PDF
-            </button>
           </div>
+          <p>No. Order: {booking.orderNumber}</p>
+          <p>No. Telefon: {booking.phone}</p>
+          <p>Unit: {booking.unit}</p>
+          <p>Alamat: {booking.address}, {booking.postcode}, {booking.state}</p>
+          <div className="text-gray-600 text-sm mb-2">
+            <p>Dari: {new Date(booking.startDate).toLocaleDateString('en-GB')} {formatTime(booking.startTime)}</p>
+            <p>Hingga: {new Date(booking.endDate).toLocaleDateString('en-GB')} {formatTime(booking.endTime)}</p>
+          </div>
+          <p className="text-blue-600">Jumlah: RM {booking.amount}</p>
+          <p className="text-green-600">
+            Deposit: RM {booking.deposit} 
+            <span className="text-gray-500 ml-2">
+              ({format(new Date(booking.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
+            </span>
+          </p>
+          <p className="text-red-600">Balance: RM {Math.round(booking.balance)}</p>
+          {booking.notes && (
+            <div className="mt-2 text-gray-600">
+              <p className="font-semibold">Nota:</p>
+              <p className="italic">{booking.notes}</p>
+            </div>
+          )}
+          <button 
+            onClick={() => generateInvoice(booking)} 
+            className="bg-blue-500 text-white px-2 py-1 rounded mt-2"
+          >
+            Download PDF
+          </button>
         </div>
-      ))}
-  </div>
+      </div>
+    ))}
 </div>
-
+			
+			
+			
+			
+          </div>
         </div>
       </div>
     </div>
