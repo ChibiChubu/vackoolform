@@ -17,12 +17,25 @@ export const RentalReceipt = ({ orderData }) => {
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${orderData.orderNumber}.pdf`);
+      
+      // Buat Blob dan URL muat turun
+      const pdfBlob = pdf.output('blob');
+      const pdfURL = URL.createObjectURL(pdfBlob);
+      
+      // Cipta pautan muat turun
+      const link = document.createElement('a');
+      link.href = pdfURL;
+      link.download = `${orderData.orderNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Bersihkan URL dan elemen pautan
+      URL.revokeObjectURL(pdfURL);
+      document.body.removeChild(link);
     });
   };
 
   const handleDownloadAndWhatsApp = () => {
-   
     // Muat turun PDF
     downloadPDF();
   };
@@ -74,16 +87,16 @@ export const RentalReceipt = ({ orderData }) => {
 
       {/* Phone Number */}
       <div className="mb-4">
-  <h3 className="text-sm font-medium mb-1">Phone Number</h3>
-  <a 
-    href={`https://wa.me/${orderData.phone}`} 
-    target="_blank" 
-    rel="noopener noreferrer" 
-    className="text-xs text-blue-600 underline"
-  >
-    {orderData.phone}
-  </a>
-</div>
+        <h3 className="text-sm font-medium mb-1">Phone Number</h3>
+        <a 
+          href={`https://wa.me/${orderData.phone}`} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-xs text-blue-600 underline"
+        >
+          {orderData.phone}
+        </a>
+      </div>
 
       {/* Address */}
       <div className="mb-4">
