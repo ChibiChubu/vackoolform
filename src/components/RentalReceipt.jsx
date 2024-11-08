@@ -74,9 +74,16 @@ export const RentalReceipt = ({ orderData }) => {
 
       {/* Phone Number */}
       <div className="mb-4">
-        <h3 className="text-sm font-medium mb-1">Phone Number</h3>
-        <p className="text-xs">{orderData.phone}</p>
-      </div>
+  <h3 className="text-sm font-medium mb-1">Phone Number</h3>
+  <a 
+    href={`https://wa.me/${orderData.phone}`} 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-xs text-blue-600 underline"
+  >
+    {orderData.phone}
+  </a>
+</div>
 
       {/* Address */}
       <div className="mb-4">
