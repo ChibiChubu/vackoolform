@@ -280,6 +280,7 @@ function App() {
             </div>
 			 <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">No. Telefon</label>
+			  
               <input 
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 name="phone"
@@ -405,16 +406,32 @@ function App() {
 			/>
 		</div>
 	<div>
-			<label className="block text-sm font-medium text-gray-700 mb-1">Negeri</label>
-			<input 
-				className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				name="state"
-				value={formData.state}
-				onChange={handleInputChange}
-				placeholder="Masukkan negeri"
-				required
-			/>
-		</div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">Negeri</label>
+  <select
+    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    name="state"
+    value={formData.state}
+    onChange={handleInputChange}
+    required
+  >
+    <option value="">Pilih negeri</option>
+    <option value="Johor">Johor</option>
+    <option value="Melaka">Melaka</option>
+    <option value="Pahang">Pahang</option>
+    <option value="Negeri Sembilan">Negeri Sembilan</option>
+    <option value="Selangor">Selangor</option>
+    <option value="Perak">Perak</option>
+    <option value="Terengganu">Terengganu</option>
+    <option value="Kelantan">Kelantan</option>
+    <option value="Pulau Pinang">Pulau Pinang</option>
+    <option value="Kedah">Kedah</option>
+    <option value="Perlis">Perlis</option>
+    <option value="Sabah">Sabah</option>
+    <option value="Sarawak">Sarawak</option>
+    <option value="Kuala Lumpur">Kuala Lumpur</option>
+  </select>
+</div>
+
 				<div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
               <textarea 
