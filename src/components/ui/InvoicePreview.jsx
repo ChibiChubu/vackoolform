@@ -1,10 +1,10 @@
 // src/components/InvoicePreview.jsx
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const InvoicePreview = () => {
   // Sample booking data - boleh adjust mengikut data sebenar
-  const booking = {
+  const [booking, setBooking] = useState({
     orderNumber: "ORD-1730807995392",
     name: "Sarah Ahmad",
     phone: "0123456789",
@@ -19,22 +19,30 @@ const InvoicePreview = () => {
     startTime: "09:00",
     endTime: "18:00",
     status: "ONGOING",
+    paymentStatus: "PAID DEPO",
     notes: "Majlis perkahwinan pada 8/11/24 dan 9/11/24",
     unit: "2x Air Cooler"
+  });
+
+  const handleStatusChange = (e) => {
+    setBooking({ ...booking, status: e.target.value });
+  };
+
+  const handlePaymentStatusChange = (e) => {
+    setBooking({ ...booking, paymentStatus: e.target.value });
   };
 
   return (
-    // Main container - Adjust full width dan padding di sini
     <div className="w-full max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg">
       
       {/* Header Section - Logo dan Company Details */}
       <div className="flex items-start gap-4 mb-8">
-        {/* Logo - Adjust size dan warna */}
+        {/* Logo */}
         <div className="w-16 h-16 rounded-full bg-teal-600 flex items-center justify-center text-white text-2xl font-bold">
           V
         </div>
         
-        {/* Company Details - Adjust font size dan spacing */}
+        {/* Company Details */}
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Vackool Enterprise</h1>
           <p className="text-gray-600">(003499862-P)</p>
@@ -50,18 +58,30 @@ const InvoicePreview = () => {
             <span>{booking.orderNumber}</span>
           </div>
           
-          {/* Status Badges - Adjust warna dan size */}
+          {/* Status Badges with Select Options */}
           <div className="flex gap-2">
-            <span className="px-4 py-1 bg-orange-500 text-white rounded-full text-sm">
-              {booking.status}
-            </span>
+            <select
+              value={booking.status}
+              onChange={handleStatusChange}
+              className="px-4 py-1 bg-orange-500 text-white rounded-full text-sm"
+            >
+              <option value="ONGOING">ONGOING</option>
+              <option value="COMPLETED">COMPLETED</option>
+            </select>
+            <select
+              value={booking.paymentStatus}
+              onChange={handlePaymentStatusChange}
+              className="px-4 py-1 bg-green-500 text-white rounded-full text-sm"
+            >
+              <option value="PAID DEPO">PAID DEPO</option>
+              <option value="DONE">DONE</option>
+            </select>
           </div>
         </div>
       </div>
 
-      {/* Customer Details Section - 2 Column Layout */}
+      {/* Customer Details Section */}
       <div className="grid grid-cols-2 gap-8 mb-8">
-        {/* Column 1 */}
         <div className="space-y-4">
           <div>
             <h2 className="font-semibold mb-2">Customer Details</h2>
@@ -77,7 +97,6 @@ const InvoicePreview = () => {
           </div>
         </div>
 
-        {/* Column 2 */}
         <div className="space-y-4">
           <div>
             <h2 className="font-semibold mb-2">Booking Period</h2>
@@ -115,7 +134,7 @@ const InvoicePreview = () => {
         </div>
       </div>
 
-      {/* Terms & Conditions Section - Boleh remove jika tak perlu */}
+      {/* Terms & Conditions */}
       <div className="mb-8">
         <h2 className="font-semibold mb-2">Terms & Conditions</h2>
         <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1">
@@ -125,7 +144,7 @@ const InvoicePreview = () => {
         </ul>
       </div>
 
-      {/* Notes Section - Optional */}
+      {/* Notes Section */}
       {booking.notes && (
         <div className="mb-8">
           <h2 className="font-semibold mb-2">Notes</h2>

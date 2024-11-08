@@ -1,5 +1,5 @@
 // src/components/RentalReceipt.jsx
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import logo from '../images/logo.png';
@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 
 export const RentalReceipt = ({ orderData }) => {
   const receiptRef = useRef();
+  const [orderStatus, setOrderStatus] = useState('ONGOING');
+  const [paymentStatus, setPaymentStatus] = useState('PAID DEPO');
 
   const downloadPDF = () => {
     const input = receiptRef.current;
@@ -64,8 +66,22 @@ export const RentalReceipt = ({ orderData }) => {
       <div className="bg-gray-50 p-4 rounded-md mb-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Order ID: {orderData.orderNumber}</span>
-          <span className="px-2 py-1 text-xs rounded bg-orange-100 text-orange-600">ONGOING</span>
-          <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-600">PAID DEPO</span>
+          <select
+            value={orderStatus}
+            onChange={(e) => setOrderStatus(e.target.value)}
+            className="px-2 py-1 text-xs rounded bg-orange-100 text-orange-600"
+          >
+            <option value="ONGOING">ONGOING</option>
+            <option value="COMPLETED">COMPLETED</option>
+          </select>
+          <select
+            value={paymentStatus}
+            onChange={(e) => setPaymentStatus(e.target.value)}
+            className="px-2 py-1 text-xs rounded bg-green-100 text-green-600"
+          >
+            <option value="PAID DEPO">PAID DEPO</option>
+            <option value="DONE">DONE</option>
+          </select>
         </div>
       </div>
 
