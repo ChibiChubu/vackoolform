@@ -414,21 +414,21 @@ function App() {
     onChange={handleInputChange}
     required
   >
-    <option value="">Pilih negeri</option>
-    <option value="Johor">Johor</option>
-    <option value="Melaka">Melaka</option>
-    <option value="Pahang">Pahang</option>
-    <option value="Negeri Sembilan">Negeri Sembilan</option>
-    <option value="Selangor">Selangor</option>
-    <option value="Perak">Perak</option>
-    <option value="Terengganu">Terengganu</option>
-    <option value="Kelantan">Kelantan</option>
-    <option value="Pulau Pinang">Pulau Pinang</option>
-    <option value="Kedah">Kedah</option>
-    <option value="Perlis">Perlis</option>
-    <option value="Sabah">Sabah</option>
-    <option value="Sarawak">Sarawak</option>
-    <option value="Kuala Lumpur">Kuala Lumpur</option>
+   <option value="">PILIH NEGERI</option>
+<option value="JOHOR">JOHOR</option>
+<option value="MELAKA">MELAKA</option>
+<option value="PAHANG">PAHANG</option>
+<option value="NEGERI SEMBILAN">NEGERI SEMBILAN</option>
+<option value="SELANGOR">SELANGOR</option>
+<option value="PERAK">PERAK</option>
+<option value="TERENGGANU">TERENGGANU</option>
+<option value="KELANTAN">KELANTAN</option>
+<option value="PULAU PINANG">PULAU PINANG</option>
+<option value="KEDAH">KEDAH</option>
+<option value="PERLIS">PERLIS</option>
+<option value="SABAH">SABAH</option>
+<option value="SARAWAK">SARAWAK</option>
+<option value="KUALA LUMPUR">KUALA LUMPUR</option>
   </select>
 </div>
 
