@@ -10,22 +10,6 @@ export const RentalReceipt = ({ orderData }) => {
   const [orderStatus, setOrderStatus] = useState('ONGOING');
   const [paymentStatus, setPaymentStatus] = useState('PAID DEPO');
 
-  // Helper function to format time consistently
-  const formatTime = (time) => {
-    if (!time) return '';
-    const [hours, minutes] = time.split(':');
-    const hr = parseInt(hours);
-    const ampm = hr >= 12 ? 'PM' : 'AM';
-    const hour12 = hr % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  };
-
-  // Helper function to format date with time
-  const formatDateTime = (date, time) => {
-    const formattedDate = format(new Date(date), 'iiii, dd MMMM yyyy');
-    return `${formattedDate} ${formatTime(time)}`;
-  };
-
   const downloadPDF = () => {
     const input = receiptRef.current;
     html2canvas(input, { scale: 2 }).then((canvas) => {
@@ -33,23 +17,28 @@ export const RentalReceipt = ({ orderData }) => {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
+
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      // Buat Blob dan URL muat turun
       const pdfBlob = pdf.output('blob');
       const pdfURL = URL.createObjectURL(pdfBlob);
       
+      // Cipta pautan muat turun
       const link = document.createElement('a');
       link.href = pdfURL;
       link.download = `${orderData.orderNumber}.pdf`;
       document.body.appendChild(link);
       link.click();
       
+      // Bersihkan URL dan elemen pautan
       URL.revokeObjectURL(pdfURL);
       document.body.removeChild(link);
     });
   };
 
   const handleDownloadAndWhatsApp = () => {
+    // Muat turun PDF
     downloadPDF();
   };
 
@@ -73,6 +62,7 @@ export const RentalReceipt = ({ orderData }) => {
         </div>
       </div>
 
+      {/* Order ID with Status Tags */}
       <div className="bg-gray-50 p-4 rounded-md mb-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Order ID: {orderData.orderNumber}</span>
@@ -95,21 +85,23 @@ export const RentalReceipt = ({ orderData }) => {
         </div>
       </div>
 
+      {/* Date & Time Slot */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Date & Time Slot</h3>
         <p className="text-xs">
-          {formatDateTime(orderData.startDate, orderData.startTime)}
+          {format(new Date(orderData.startDate), 'iiii, dd MMMM yyyy h:mm a')}
           <br />
-          {formatDateTime(orderData.endDate, orderData.endTime)}
+          {format(new Date(orderData.endDate), 'iiii, dd MMMM yyyy h:mm a')}
         </p>
       </div>
 
-      {/* Rest of the component remains unchanged */}
+      {/* Name */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Name</h3>
         <p className="text-xs">{orderData.name}</p>
       </div>
 
+      {/* Phone Number */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Phone Number</h3>
         <a 
@@ -122,11 +114,13 @@ export const RentalReceipt = ({ orderData }) => {
         </a>
       </div>
 
+      {/* Address */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Address</h3>
         <p className="text-xs">{orderData.address}, {orderData.postcode}, {orderData.state}</p>
       </div>
 
+      {/* Payment Details */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Payment Details</h3>
         <div className="space-y-1 text-xs">
@@ -138,7 +132,7 @@ export const RentalReceipt = ({ orderData }) => {
             <span>
               Deposit: 
               <span className="text-gray-500 ml-1">
-                ({formatDateTime(orderData.createdAt, '')})
+                ({format(new Date(orderData.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
               </span>
             </span>
             <span className="text-green-600">RM {parseFloat(orderData.deposit).toFixed(2)}</span>
@@ -150,6 +144,7 @@ export const RentalReceipt = ({ orderData }) => {
         </div>
       </div>
 
+      {/* Order Items */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Order Items</h3>
         <div className="border rounded-md overflow-hidden">
@@ -180,6 +175,7 @@ export const RentalReceipt = ({ orderData }) => {
         </div>
       </div>
 
+      {/* Notes */}
       {orderData.notes && (
         <div className="mb-4">
           <h3 className="text-sm font-medium mb-1">Notes:</h3>
@@ -187,6 +183,7 @@ export const RentalReceipt = ({ orderData }) => {
         </div>
       )}
 
+      {/* Footer */}
       <div className="text-center text-xs text-gray-500 mt-4">
         Thank you for your business!
       </div>
