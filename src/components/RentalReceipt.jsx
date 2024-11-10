@@ -96,13 +96,14 @@ export const RentalReceipt = ({ orderData }) => {
       </div>
 
       <div className="mb-4">
-        <h3 className="text-sm font-medium mb-1">Date & Time Slot</h3>
-        <p className="text-xs">
-          {formatDateTime(orderData.startDate, orderData.startTime)}
-          <br />
-          {formatDateTime(orderData.endDate, orderData.endTime)}
-        </p>
-      </div>
+    <h3 className="text-sm font-medium mb-1">Date & Time Slot</h3>
+    <p className="text-xs">
+        <strong>Start Event:</strong> {formatDateTime(orderData.startDate, orderData.startTime)}
+        <br />
+        <strong>End Event:</strong> {formatDateTime(orderData.endDate, orderData.endTime)}
+    </p>
+</div>
+
 
       {/* Rest of the component remains unchanged */}
       <div className="mb-4">
@@ -189,6 +190,8 @@ export const RentalReceipt = ({ orderData }) => {
 
       <div className="text-center text-xs text-gray-500 mt-4">
         Thank you for your business!
+		  <br />
+    <span className="text-gray-400">This invoice was created by our automated system.</span>
       </div>
     </div>
   );
