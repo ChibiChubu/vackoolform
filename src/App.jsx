@@ -116,6 +116,7 @@ function App() {
   status: 'Pending'
 };
 
+console.log("Data to be submitted:", submitData);
       await addDoc(collection(db, 'bookings'), submitData);
       
       setFormData({
