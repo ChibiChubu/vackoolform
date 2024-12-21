@@ -21,22 +21,19 @@ function App() {
   };
 
   const [formData, setFormData] = useState({
-  name: '',
-  phone: '',
-  amount: '',
-  unit: '',
-  deposit: '',
-  balance: '',
-  balancePaymentDate: '',
-  fullPayment: '',
-  fullPaymentDate: '',
-  address: '',
-  postcode: '',
-  state: '',
-  notes: '',
-  status: 'Pending'
-});
-
+    name: '',
+    phone: '',
+    amount: '',
+    unit: '',
+    deposit: '',
+    balance: '',
+    balancePaymentDate: '',
+    address: '',
+    postcode: '',
+    state: '',
+    notes: '',
+    status: 'Pending'
+  });
   
   const [bookings, setBookings] = useState([]);
   const [startDate, setStartDate] = useState(null);
@@ -103,18 +100,15 @@ function App() {
 
     try {
       const submitData = {
-  ...formData,
-  orderNumber: `ORD-${Date.now()}`,
-  startDate: startDate.toISOString(),
-  endDate: endDate.toISOString(),
-  startTime,
-  endTime,
-  createdAt: new Date().toISOString(),
-  balancePaymentDate: formData.balancePaymentDate ? new Date(formData.balancePaymentDate).toISOString() : null,
-  fullPayment: formData.fullPayment,
-  fullPaymentDate: formData.fullPaymentDate ? new Date(formData.fullPaymentDate).toISOString() : null,
-  status: 'Pending'
-};
+        ...formData,
+        orderNumber: `ORD-${Date.now()}`,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        startTime,
+        endTime,
+        createdAt: new Date().toISOString(),
+        status: 'Pending'
+      };
 
       await addDoc(collection(db, 'bookings'), submitData);
       
@@ -156,8 +150,6 @@ function App() {
       deposit: booking.deposit,
       balance: booking.balance,
       balancePaymentDate: booking.balancePaymentDate ? booking.balancePaymentDate.split('T')[0] : '',
-	  fullPayment: booking.fullPayment || '',
-	  fullPaymentDate: booking.fullPaymentDate ? booking.fullPaymentDate.split('T')[0] : '',
       address: booking.address,
       postcode: booking.postcode,
       state: booking.state,
@@ -484,32 +476,6 @@ function App() {
   </select>
 </div>
 
-<div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">Full Payment (RM)</label>
-  <div className="flex gap-2">
-    <input 
-      className="w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      name="fullPayment"
-      type="number"
-      step="0.01"
-      value={formData.fullPayment}
-      onChange={handleInputChange}
-      placeholder="Masukkan full payment"
-    />
-    <input 
-      type="date"
-      className="w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      name="fullPaymentDate"
-      value={formData.fullPaymentDate}
-      onChange={handleInputChange}
-      placeholder="Tarikh full payment"
-    />
-  </div>
-</div>
-
-
-
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
               <textarea 
@@ -652,31 +618,14 @@ function App() {
                           ({format(new Date(booking.createdAt), 'iiii, dd MMMM yyyy h:mm a')})
                         </span>
                       </p>
-					  
-					  
-					  
-               <p className="text-red-600">
-  Balance: RM {Math.round(booking.balance)}
-</p>
-
-					  
-<p className="text-green-600">
-  Full Payment: RM {booking.fullPayment || 0}
-  {booking.fullPaymentDate && (
-    <span className="text-gray-500 ml-2">
-      (Pay On: {new Date(booking.fullPaymentDate).toLocaleDateString('en-GB', {
-        weekday: 'long', // Hari penuh
-        day: '2-digit',  // Hari dalam dua digit
-        month: 'long',   // Nama bulan penuh
-        year: 'numeric', // Tahun penuh
-      })})
-    </span>
-  )}
-</p>
-
-					  
-					  
-					  
+                      <p className="text-red-600">
+                        Balance: RM {Math.round(booking.balance)}
+                        {booking.balancePaymentDate && (
+                          <span className="text-gray-500 ml-2">
+                            (Dibayar pada: {new Date(booking.balancePaymentDate).toLocaleDateString('en-GB')})
+                          </span>
+                        )}
+                      </p>
                       {booking.notes && (
                         <div className="mt-2 text-gray-600">
                           <p className="font-semibold">Nota:</p>

@@ -154,7 +154,7 @@ const InvoicePreview = () => {
 
       {/* Footer */}
       <div className="text-center text-gray-500 text-sm">
-        <p>Thank you for your business!</p>
+        <p>Thank you for your Support!</p>
         <p>Contact us: 012-3456789</p>
       </div>
     </div>

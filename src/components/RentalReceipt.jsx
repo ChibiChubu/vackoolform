@@ -76,22 +76,32 @@ export const RentalReceipt = ({ orderData }) => {
       <div className="bg-gray-50 p-4 rounded-md mb-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Order ID: {orderData.orderNumber}</span>
-          <select
-            value={orderStatus}
-            onChange={(e) => setOrderStatus(e.target.value)}
-            className="px-2 py-1 text-xs rounded bg-orange-100 text-orange-600"
-          >
-            <option value="ONGOING">ONGOING</option>
-            <option value="COMPLETED">COMPLETED</option>
-          </select>
-          <select
-            value={paymentStatus}
-            onChange={(e) => setPaymentStatus(e.target.value)}
-            className="px-2 py-1 text-xs rounded bg-green-100 text-green-600"
-          >
-            <option value="PAID DEPO">PAID DEPO</option>
-            <option value="DONE">DONE</option>
-          </select>
+         <select
+  value={orderStatus}
+  onChange={(e) => setOrderStatus(e.target.value)}
+  className={`px-2 py-1 text-xs rounded ${
+    orderStatus === 'COMPLETED'
+      ? 'bg-green-100 text-green-600'
+      : 'bg-orange-100 text-orange-600'
+  }`}
+>
+  <option value="ONGOING">ONGOING</option>
+  <option value="COMPLETED">COMPLETED</option>
+</select>
+
+<select
+  value={paymentStatus}
+  onChange={(e) => setPaymentStatus(e.target.value)}
+  className={`px-2 py-1 text-xs rounded ${
+    paymentStatus === 'DONE'
+      ? 'bg-green-100 text-green-600'
+      : 'bg-orange-100 text-orange-600'
+  }`}
+>
+  <option value="PAID DEPO">PAID DEPO</option>
+  <option value="DONE">DONE</option>
+</select>
+
         </div>
       </div>
 
@@ -128,28 +138,43 @@ export const RentalReceipt = ({ orderData }) => {
         <p className="text-xs">{orderData.address}, {orderData.postcode}, {orderData.state}</p>
       </div>
 
-      <div className="mb-4">
-        <h3 className="text-sm font-medium mb-1">Payment Details</h3>
-        <div className="space-y-1 text-xs">
-          <div className="flex justify-between">
-            <span>Amount:</span>
-            <span className="text-blue-600">RM {parseFloat(orderData.amount).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>
-              Deposit: 
-              <span className="text-gray-500 ml-1">
-                ({formatDateTime(orderData.createdAt, '')})
-              </span>
-            </span>
-            <span className="text-green-600">RM {parseFloat(orderData.deposit).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Balance:</span>
-            <span className="text-red-600">RM {parseFloat(orderData.balance).toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
+<div className="mb-4">
+  <h3 className="text-sm font-medium mb-1">Payment Details</h3>
+  <div className="space-y-1 text-xs">
+    <div className="flex justify-between items-center">
+      <span>
+        Deposit: 
+        <span className="text-gray-500 ml-1">
+          ({formatDateTime(orderData.createdAt, '')})
+        </span>
+      </span>
+      <span className="text-green-600">RM {parseFloat(orderData.deposit).toFixed(2)}</span>
+    </div>
+    <div className="flex justify-between">
+      <span>Balance:</span>
+      <span className="text-red-600">RM {parseFloat(orderData.balance).toFixed(2)}</span>
+    </div>
+    <div className="flex justify-between items-center">
+      <span>
+        Full Payment: 
+        {orderData.fullPaymentDate && (
+          <span className="text-gray-500 ml-1">
+            (Pay On: {format(new Date(orderData.fullPaymentDate), 'iiii, dd MMMM yyyy')})
+          </span>
+        )}
+      </span>
+      <span className="font-bold text-black">RM {parseFloat(orderData.fullPayment || 0).toFixed(2)}</span>
+    </div>
+  </div>
+</div>
+
+
+
+
+	  
+	  
+	  
+	  
 
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-1">Order Items</h3>
@@ -172,10 +197,11 @@ export const RentalReceipt = ({ orderData }) => {
                 <td className="p-2">{(parseFloat(orderData.amount) / parseInt(orderData.unit)).toFixed(2)}</td>
                 <td className="text-right p-2">{parseFloat(orderData.amount).toFixed(2)}</td>
               </tr>
-              <tr className="border-t">
-                <td colSpan="4" className="text-right p-2 font-medium">Total:</td>
-                <td className="text-right p-2">{parseFloat(orderData.amount).toFixed(2)}</td>
-              </tr>
+             <tr className="border-t">
+  <td colSpan="4" className="text-right p-2 font-medium">Total:</td>
+  <td className="text-right p-2 font-bold">{parseFloat(orderData.amount).toFixed(2)}</td>
+</tr>
+
             </tbody>
           </table>
         </div>
@@ -189,7 +215,7 @@ export const RentalReceipt = ({ orderData }) => {
       )}
 
       <div className="text-center text-xs text-gray-500 mt-4">
-        Thank you for your business!
+        Thank you for your Support!
 		  <br />
     <span className="text-gray-400">This invoice was created by our automated system.</span>
       </div>

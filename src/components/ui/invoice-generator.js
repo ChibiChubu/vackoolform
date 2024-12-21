@@ -49,11 +49,13 @@ function generateInvoicePDF(booking) {
   doc.text(`Phone Number: ${booking.phone}`, 15, 112);
   doc.text(`Address: ${booking.address}, ${booking.postcode}, ${booking.state}`, 15, 119);
 
-  // Payment Details
-  doc.text('Payment Details:', 15, 135);
-  doc.text(`Amount: RM ${parseFloat(booking.amount).toFixed(2)}`, 15, 142);
-  doc.text(`Deposit: RM ${parseFloat(booking.deposit).toFixed(2)} (${new Date(booking.createdAt).toLocaleDateString('ms-MY')} ${new Date(booking.createdAt).toLocaleTimeString('ms-MY')})`, 15, 149);
-  doc.text(`Balance: RM ${parseFloat(booking.balance).toFixed(2)}`, 15, 156);
+  / Payment Details
+  doc.text('Payment Details:', 15, 142);
+  doc.text(`Amount: RM ${parseFloat(booking.amount).toFixed(2)} (Complete payment upon setup)`, 15, 149);
+  doc.text(`Deposit: RM ${parseFloat(booking.deposit).toFixed(2)} (${new Date(booking.createdAt).toLocaleDateString('ms-MY')})`, 15, 156);
+  const amountToComplete = parseFloat(booking.amount) - parseFloat(booking.deposit);
+  doc.text(`Balance: RM ${amountToComplete.toFixed(2)} (${new Date(booking.endDate).toLocaleDateString('ms-MY')} ${new Date(booking.endDate).toLocaleTimeString('ms-MY')})`, 15, 163);
+
 
   // Order Items
   const tableData = [
