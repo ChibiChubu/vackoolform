@@ -1,0 +1,93 @@
+[debug] [2024-12-21T14:48:44.800Z] ----------------------------------------------------------------------
+[debug] [2024-12-21T14:48:44.802Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Administrator\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting --debug
+[debug] [2024-12-21T14:48:44.802Z] CLI Version:   13.29.1
+[debug] [2024-12-21T14:48:44.803Z] Platform:      win32
+[debug] [2024-12-21T14:48:44.803Z] Node Version:  v22.11.0
+[debug] [2024-12-21T14:48:44.803Z] Time:          Sat Dec 21 2024 22:48:44 GMT+0800 (Singapore Standard Time)
+[debug] [2024-12-21T14:48:44.803Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-12-21T14:48:44.852Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-12-21T14:48:44.852Z] > authorizing via signed-in user (d3mmy88@gmail.com)
+[debug] [2024-12-21T14:48:44.853Z] [iam] checking project vackoolform for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2024-12-21T14:48:44.854Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:44.854Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:44.855Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/vackoolform:testIamPermissions [none]
+[debug] [2024-12-21T14:48:44.855Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/vackoolform:testIamPermissions x-goog-quota-user=projects/vackoolform
+[debug] [2024-12-21T14:48:44.855Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/vackoolform:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-12-21T14:48:45.987Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/vackoolform:testIamPermissions 200
+[debug] [2024-12-21T14:48:45.987Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/vackoolform:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-12-21T14:48:45.988Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:45.988Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:45.989Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/vackoolform [none]
+[debug] [2024-12-21T14:48:46.308Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/vackoolform 200
+[debug] [2024-12-21T14:48:46.309Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/vackoolform {"projectId":"vackoolform","projectNumber":"1040644503230","displayName":"vackoolform","name":"projects/vackoolform","resources":{"hostingSite":"vackoolform"},"state":"ACTIVE","etag":"1_5c87f390-28e6-464a-a050-2945ec67f237"}
+[info] 
+[info] === Deploying to 'vackoolform'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2024-12-21T14:48:46.313Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:46.314Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:46.314Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions [none]
+[debug] [2024-12-21T14:48:46.314Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2024-12-21T14:48:47.534Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions 200
+[debug] [2024-12-21T14:48:47.534Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions {"name":"projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[vackoolform]: beginning deploy... 
+[info] i  hosting[vackoolform]: found 1 files in build 
+[debug] [2024-12-21T14:48:47.542Z] [hosting] uploading with 200 concurrency
+[debug] [2024-12-21T14:48:47.544Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:47.545Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:47.547Z] [hosting] hash cache [YnVpbGQ] stored for 1 files
+[debug] [2024-12-21T14:48:47.548Z] [hosting][hash queue][FINAL] {"max":0,"min":0,"avg":0,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":4}
+[debug] [2024-12-21T14:48:47.549Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2:populateFiles [none]
+[debug] [2024-12-21T14:48:47.550Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2:populateFiles {"files":{"/index.html":"4243b38e5463fedf78d24d504bc3454d8504210944b92d0cc48d078a1bbca00d"}}
+[debug] [2024-12-21T14:48:47.923Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2:populateFiles 200
+[debug] [2024-12-21T14:48:47.923Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2:populateFiles {"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/vackoolform/versions/adf4db5e9ec626e2/files"}
+[debug] [2024-12-21T14:48:47.924Z] [hosting][populate queue][FINAL] {"max":380,"min":380,"avg":380,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":380}
+[debug] [2024-12-21T14:48:47.924Z] [hosting] uploads queued: 0
+[debug] [2024-12-21T14:48:47.924Z] [hosting][upload queue][FINAL] {"max":0,"min":9999999999,"avg":0,"active":0,"complete":0,"success":0,"errored":0,"retried":0,"total":0,"elapsed":1734792527924}
+[info] i  hosting: upload complete 
+[info] +  hosting[vackoolform]: file upload complete 
+[debug] [2024-12-21T14:48:47.925Z] [hosting] deploy completed after 388ms
+[debug] [2024-12-21T14:48:47.925Z] [
+  {
+    "config": {
+      "public": "build",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "site": "vackoolform"
+    },
+    "version": "projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2"
+  }
+]
+[info] i  hosting[vackoolform]: finalizing version... 
+[debug] [2024-12-21T14:48:47.928Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:47.928Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:47.929Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions/adf4db5e9ec626e2 updateMask=status%2Cconfig
+[debug] [2024-12-21T14:48:47.929Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions/adf4db5e9ec626e2 {"status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]}}
+[debug] [2024-12-21T14:48:48.514Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions/adf4db5e9ec626e2 200
+[debug] [2024-12-21T14:48:48.515Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/versions/adf4db5e9ec626e2 {"name":"projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2024-12-21T14:48:46.944924Z","createUser":{"email":"d3mmy88@gmail.com"},"finalizeTime":"2024-12-21T14:48:48.211496Z","finalizeUser":{"email":"d3mmy88@gmail.com"}}
+[debug] [2024-12-21T14:48:48.516Z] [hosting] finalized version for vackoolform:[object Object]
+[info] +  hosting[vackoolform]: version finalized 
+[info] i  hosting[vackoolform]: releasing new version... 
+[debug] [2024-12-21T14:48:48.518Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:48.518Z] Checked if tokens are valid: true, expires at: 1734795225925
+[debug] [2024-12-21T14:48:48.519Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/channels/live/releases versionName=projects%2F1040644503230%2Fsites%2Fvackoolform%2Fversions%2Fadf4db5e9ec626e2
+[debug] [2024-12-21T14:48:48.519Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/channels/live/releases {}
+[debug] [2024-12-21T14:48:49.157Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/channels/live/releases 200
+[debug] [2024-12-21T14:48:49.157Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/vackoolform/channels/live/releases {"name":"projects/1040644503230/sites/vackoolform/channels/live/releases/1734792528251000","version":{"name":"projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2024-12-21T14:48:46.944924Z","createUser":{"email":"d3mmy88@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKCGPU4xFvCbmD9CJTcOW2pSePbdHI1X4Fj74pJa87YnJIs8Es"},"finalizeTime":"2024-12-21T14:48:48.211496Z","finalizeUser":{"email":"d3mmy88@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKCGPU4xFvCbmD9CJTcOW2pSePbdHI1X4Fj74pJa87YnJIs8Es"}},"type":"DEPLOY","releaseTime":"2024-12-21T14:48:48.251Z","releaseUser":{"email":"d3mmy88@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKCGPU4xFvCbmD9CJTcOW2pSePbdHI1X4Fj74pJa87YnJIs8Es"}}
+[debug] [2024-12-21T14:48:49.159Z] [hosting] release: {"name":"projects/1040644503230/sites/vackoolform/channels/live/releases/1734792528251000","version":{"name":"projects/1040644503230/sites/vackoolform/versions/adf4db5e9ec626e2","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2024-12-21T14:48:46.944924Z","createUser":{"email":"d3mmy88@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKCGPU4xFvCbmD9CJTcOW2pSePbdHI1X4Fj74pJa87YnJIs8Es"},"finalizeTime":"2024-12-21T14:48:48.211496Z","finalizeUser":{"email":"d3mmy88@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKCGPU4xFvCbmD9CJTcOW2pSePbdHI1X4Fj74pJa87YnJIs8Es"}},"type":"DEPLOY","releaseTime":"2024-12-21T14:48:48.251Z","releaseUser":{"email":"d3mmy88@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKCGPU4xFvCbmD9CJTcOW2pSePbdHI1X4Fj74pJa87YnJIs8Es"}}
+[info] +  hosting[vackoolform]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/vackoolform/overview
+[info] Hosting URL: https://vackoolform.web.app

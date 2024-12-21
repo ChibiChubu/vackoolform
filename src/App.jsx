@@ -86,6 +86,15 @@ function App() {
     }));
   }, [formData.amount, formData.deposit]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const bookingData = await getDocs(collection(db, 'bookings'));
+      console.log("Data dari Firestore:", bookingData.docs.map(doc => doc.data()));
+    };
+
+    fetchData();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -93,6 +102,7 @@ function App() {
       [name]: value
     }));
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
