@@ -3,8 +3,6 @@ import { db } from './firebase.js';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { RentalReceipt } from './components/RentalReceipt';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import logo from './images/logo.png';
 
 const inputCls =
@@ -48,7 +46,6 @@ function App() {
   const [statusFilter, setStatusFilter] = useState('all');
   const invoiceRef = useRef(null);
   const [invoiceBooking, setInvoiceBooking] = useState(null);
-  const [generatingPDF, setGeneratingPDF] = useState(false);
   const [invStatus, setInvStatus] = useState('ONGOING');
   const [invPayment, setInvPayment] = useState('PAID DEPO');
   const [invoiceSync, setInvoiceSync] = useState('');
@@ -295,36 +292,20 @@ function App() {
     }
   };
 
-  const generateInvoice = async () => {
-    try {
-      setGeneratingPDF(true);
-      await new Promise((r) => setTimeout(r, 350));
-      const el = invoiceRef.current;
-      if (!el || !invoiceBooking) throw new Error('Invois belum siap dirender');
-      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      // Multi-page support — kalau invois panjang, auto continue ke page 2
-      let remaining = imgHeight;
-      let position = 0;
-      while (remaining > 0) {
-        pdf.addImage(imgData, 'PNG', 0, -position, pdfWidth, imgHeight);
-        remaining -= pageHeight;
-        position += pageHeight;
-        if (remaining > 0) pdf.addPage();
-      }
-
-      pdf.save(`${invoiceBooking.orderNumber || 'invois'}.pdf`);
-    } catch (err) {
-      console.error('PDF generation error:', err);
-      alert('Gagal jana PDF. Sila cuba lagi.');
-    } finally {
-      setGeneratingPDF(false);
+  // Tandai body bila invois dibuka — print CSS akan print invois je, takde baris terpotong
+  useEffect(() => {
+    if (invoiceBooking) {
+      document.body.classList.add('printing-invoice');
+    } else {
+      document.body.classList.remove('printing-invoice');
     }
+    return () => document.body.classList.remove('printing-invoice');
+  }, [invoiceBooking]);
+
+  // Download PDF — guna system print dialog (desktop: "Save as PDF" / phone: Share > Save as PDF)
+  // Pagination bersih, text sharp, warna kekal
+  const generateInvoice = () => {
+    window.print();
   };
 
   const handleSort = (order) => {
@@ -350,7 +331,8 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 pb-28">
+    <>
+    <div className="app-shell min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 pb-28">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
@@ -883,10 +865,9 @@ function App() {
                 <button
                   type="button"
                   onClick={() => generateInvoice()}
-                  disabled={generatingPDF}
-                  className="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-extrabold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600 disabled:opacity-60"
+                  className="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-extrabold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600"
                 >
-                  {generatingPDF ? 'Menjana PDF…' : '⬇ Muat Turun PDF'}
+                  ⬇ Muat Turun PDF
                 </button>
               </div>
             </div>
@@ -894,6 +875,18 @@ function App() {
         </div>
       )}
     </div>
+
+    {/* Print-only: bila print, area ni je yang keluar — takde baris terpotong */}
+    {invoiceBooking && (
+      <div className="invoice-print-area">
+        <RentalReceipt
+          orderData={invoiceBooking}
+          statusLabel={invStatus}
+          paymentLabel={invPayment}
+        />
+      </div>
+    )}
+    </>
   );
 }
 

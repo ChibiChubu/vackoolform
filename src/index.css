@@ -29,3 +29,46 @@ form textarea:focus {
   border-color: #38b09d;
   box-shadow: 0 0 0 3px rgba(56, 176, 157, 0.18);
 }
+
+/* ===== Print / Download PDF (invois) ===== */
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
+.invoice-print-area {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    min-height: 0 !important;
+  }
+
+  /* Bila invois dibuka: sembunyikan app, print invois je */
+  body.printing-invoice .app-shell {
+    display: none !important;
+  }
+  body.printing-invoice .invoice-print-area {
+    display: block !important;
+    width: 100%;
+  }
+
+  /* Jaga warna brand + pills masa print */
+  .invoice-print-area,
+  .invoice-print-area * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Jangan potong tengah baris/section */
+  .break-avoid,
+  tr,
+  td,
+  th {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -43,7 +43,7 @@ export const RentalReceipt = ({
 
       <div className="p-6 sm:p-8">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="break-avoid flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-100">
               <img src={logo} alt="Vackool" className="h-11 w-11 object-contain" />
@@ -66,7 +66,7 @@ export const RentalReceipt = ({
         </div>
 
         {/* Order ID + status pills */}
-        <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
+        <div className="break-avoid mt-5 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Order ID
           </span>
@@ -93,7 +93,7 @@ export const RentalReceipt = ({
 
         {/* Info grid */}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-slate-100 p-4">
+          <div className="break-avoid rounded-xl border border-slate-100 p-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Date &amp; Time Slot
             </p>
@@ -113,7 +113,7 @@ export const RentalReceipt = ({
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-100 p-4">
+          <div className="break-avoid rounded-xl border border-slate-100 p-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Pelanggan
             </p>
@@ -135,7 +135,7 @@ export const RentalReceipt = ({
         </div>
 
         {/* Payment details */}
-        <div className="mt-4 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-100">
+        <div className="break-avoid mt-4 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-100">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Payment Details
           </p>
@@ -202,7 +202,7 @@ export const RentalReceipt = ({
                 </tr>
               </tbody>
             </table>
-            <div className="flex items-center justify-end gap-4 border-t border-slate-100 bg-slate-50 px-4 py-3">
+            <div className="break-avoid flex items-center justify-end gap-4 border-t border-slate-100 bg-slate-50 px-4 py-3">
               <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Total
               </span>
@@ -212,14 +212,14 @@ export const RentalReceipt = ({
         </div>
 
         {orderData.notes && (
-          <div className="mt-4 rounded-xl border border-dashed border-slate-200 p-4">
+          <div className="break-avoid mt-4 rounded-xl border border-dashed border-slate-200 p-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Notes</p>
             <p className="mt-1 text-xs text-slate-600">{orderData.notes}</p>
           </div>
         )}
 
         {/* Footer */}
-        <div className="mt-6 border-t border-dashed border-slate-200 pt-4 text-center">
+        <div className="break-avoid mt-6 border-t border-dashed border-slate-200 pt-4 text-center">
           <p className="text-xs font-extrabold tracking-wide text-[#2E9484]">
             Thank you for your Support!
           </p>
