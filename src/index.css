@@ -72,3 +72,18 @@ form textarea:focus {
     page-break-inside: avoid;
   }
 }
+
+/* ===== Capture mode (iOS PDF) — render invois off-screen untuk html2canvas ===== */
+.invoice-print-area.capture-mode {
+  display: block !important;
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  width: 780px;
+  background: #ffffff;
+}
+
+/* Paksa layout 2 kolum macam desktop masa capture (viewport phone terlalu kecil untuk breakpoint sm) */
+.invoice-print-area.capture-mode .sm\:grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}

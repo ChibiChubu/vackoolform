@@ -45,6 +45,8 @@ function App() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [statusFilter, setStatusFilter] = useState('all');
   const invoiceRef = useRef(null);
+  const printAreaRef = useRef(null);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
   const [invoiceBooking, setInvoiceBooking] = useState(null);
   const [invStatus, setInvStatus] = useState('ONGOING');
   const [invPayment, setInvPayment] = useState('PAID DEPO');
@@ -302,12 +304,21 @@ function App() {
     return () => document.body.classList.remove('printing-invoice');
   }, [invoiceBooking]);
 
-  // Download PDF — guna system print dialog (desktop: "Save as PDF" / phone: Share > Save as PDF)
-  // Pagination bersih, text sharp, warna kekal
-  // Nama fail PDF ikut document.title → set sekejap masa print, lepas tu pulihkan
-  const generateInvoice = () => {
+  // Download PDF
+  // iPhone/iPad: jana fail PDF betul — print preview iOS lambat + kena zoom & share manual
+  // Desktop/Android: guna print dialog (native, sharp, cepat)
+  const PDF_FILENAME = 'Vackool - Confirmation Invoice';
+
+  const isIOSDevice = () =>
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  const isInAppBrowser = () => /FBAN|FBAV|Instagram|Line\/|TikTok/i.test(navigator.userAgent);
+
+  // Desktop/Android — nama fail PDF ikut document.title
+  const printInvoice = () => {
     const prevTitle = document.title;
-    document.title = 'Vackool - Confirmation Invoice';
+    document.title = PDF_FILENAME;
 
     const restoreTitle = () => {
       document.title = prevTitle;
@@ -319,6 +330,111 @@ function App() {
 
     // Fallback kalau browser tak trigger afterprint (phone)
     setTimeout(restoreTitle, 120000);
+  };
+
+  // iOS — render invois ke canvas, potong ikut sempadan baris (takde baris terpotong), simpan PDF
+  const buildPdfForIOS = async () => {
+    const node = printAreaRef.current;
+    if (!node) throw new Error('Invois belum siap');
+
+    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
+
+    node.classList.add('capture-mode');
+
+    try {
+      // Bagi layout settle dulu sebelum capture
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      // Pastikan logo dah load — kalau tak, html2canvas skip gambar
+      await Promise.all(
+        Array.from(node.querySelectorAll('img')).map((img) =>
+          img.complete
+            ? null
+            : new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+              })
+        )
+      );
+
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+      });
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const margin = 8;
+      const contentW = 210 - margin * 2; // mm
+      const contentH = 297 - margin * 2; // mm
+      const pxPerMm = canvas.width / contentW;
+      const pageHPx = contentH * pxPerMm;
+
+      // Titik potong selamat: bawah setiap baris / section
+      const nodeRect = node.getBoundingClientRect();
+      const scale = canvas.width / nodeRect.width;
+      const breaks = Array.from(node.querySelectorAll('tr, .break-avoid'))
+        .map((el) => Math.round((el.getBoundingClientRect().bottom - nodeRect.top) * scale))
+        .filter((b) => b > 0)
+        .sort((a, b) => a - b);
+
+      let pos = 0;
+      let first = true;
+      while (pos < canvas.height - 1) {
+        let end = Math.min(pos + pageHPx, canvas.height);
+        if (end < canvas.height) {
+          const safe = breaks.filter((b) => b <= end && b > pos + pageHPx * 0.25);
+          if (safe.length) end = safe[safe.length - 1];
+        }
+
+        const sliceH = Math.max(1, Math.round(end - pos));
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = sliceH;
+        const ctx = slice.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, slice.width, sliceH);
+        ctx.drawImage(canvas, 0, -pos);
+
+        if (!first) pdf.addPage();
+        pdf.addImage(
+          slice.toDataURL('image/jpeg', 0.92),
+          'JPEG',
+          margin,
+          margin,
+          contentW,
+          sliceH / pxPerMm
+        );
+        first = false;
+        pos = end;
+      }
+
+      pdf.save(`${PDF_FILENAME}.pdf`);
+    } finally {
+      node.classList.remove('capture-mode');
+    }
+  };
+
+  const generateInvoice = async () => {
+    if (!isIOSDevice()) {
+      printInvoice();
+      return;
+    }
+
+    try {
+      setGeneratingPDF(true);
+      await buildPdfForIOS();
+    } catch (err) {
+      console.error('PDF error:', err);
+      // Fallback — jangan tinggal pengguna tergantung
+      printInvoice();
+    } finally {
+      setGeneratingPDF(false);
+    }
   };
 
   const handleSort = (order) => {
@@ -866,6 +982,14 @@ function App() {
                 />
               </div>
 
+              {/* Nota: dalam app browser (IG/FB/TikTok) download selalu kena block */}
+              {isInAppBrowser() && (
+                <div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-800">
+                  ⚠️ PDF susah keluar dalam app ni. Tekan menu (⋯) di atas →{' '}
+                  <b>Open in browser</b> (Safari/Chrome), lepas tu download semula.
+                </div>
+              )}
+
               {/* Footer actions */}
               <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-4 py-3">
                 <p className="hidden text-[11px] sm:block">
@@ -878,9 +1002,10 @@ function App() {
                 <button
                   type="button"
                   onClick={() => generateInvoice()}
-                  className="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-extrabold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600"
+                  disabled={generatingPDF}
+                  className="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-extrabold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600 disabled:opacity-60"
                 >
-                  ⬇ Muat Turun PDF
+                  {generatingPDF ? 'Menjana PDF…' : '⬇ Muat Turun PDF'}
                 </button>
               </div>
             </div>
@@ -891,7 +1016,7 @@ function App() {
 
     {/* Print-only: bila print, area ni je yang keluar — takde baris terpotong */}
     {invoiceBooking && (
-      <div className="invoice-print-area">
+      <div className="invoice-print-area" ref={printAreaRef}>
         <RentalReceipt
           orderData={invoiceBooking}
           statusLabel={invStatus}
