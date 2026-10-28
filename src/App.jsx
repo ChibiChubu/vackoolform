@@ -304,8 +304,21 @@ function App() {
 
   // Download PDF — guna system print dialog (desktop: "Save as PDF" / phone: Share > Save as PDF)
   // Pagination bersih, text sharp, warna kekal
+  // Nama fail PDF ikut document.title → set sekejap masa print, lepas tu pulihkan
   const generateInvoice = () => {
+    const prevTitle = document.title;
+    document.title = 'Vackool - Confirmation Invoice';
+
+    const restoreTitle = () => {
+      document.title = prevTitle;
+      window.removeEventListener('afterprint', restoreTitle);
+    };
+    window.addEventListener('afterprint', restoreTitle);
+
     window.print();
+
+    // Fallback kalau browser tak trigger afterprint (phone)
+    setTimeout(restoreTitle, 120000);
   };
 
   const handleSort = (order) => {
