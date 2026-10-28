@@ -304,18 +304,13 @@ function App() {
     return () => document.body.classList.remove('printing-invoice');
   }, [invoiceBooking]);
 
-  // Download PDF
-  // iPhone/iPad: jana fail PDF betul — print preview iOS lambat + kena zoom & share manual
-  // Desktop/Android: guna print dialog (native, sharp, cepat)
+  // Download PDF — SEMUA device (web / iPhone / Android): jana fail PDF A4 portrait sendiri.
+  // Sebab: print dialog browser tambah header/footer (URL github) & ikut setting printer user.
   const PDF_FILENAME = 'Vackool - Confirmation Invoice';
-
-  const isIOSDevice = () =>
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   const isInAppBrowser = () => /FBAN|FBAV|Instagram|Line\/|TikTok/i.test(navigator.userAgent);
 
-  // Desktop/Android — nama fail PDF ikut document.title
+  // Fallback terakhir (kalau jana PDF gagal) — print dialog
   const printInvoice = () => {
     const prevTitle = document.title;
     document.title = PDF_FILENAME;
@@ -332,8 +327,8 @@ function App() {
     setTimeout(restoreTitle, 120000);
   };
 
-  // iOS — render invois ke canvas, potong ikut sempadan baris (takde baris terpotong), simpan PDF
-  const buildPdfForIOS = async () => {
+  // Render invois ke canvas → potong ikut sempadan baris → PDF A4 portrait (takde baris terpotong)
+  const buildInvoicePdf = async () => {
     const node = printAreaRef.current;
     if (!node) throw new Error('Invois belum siap');
 
@@ -361,7 +356,7 @@ function App() {
       );
 
       const canvas = await html2canvas(node, {
-        scale: 2,
+        scale: 3,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
@@ -420,14 +415,9 @@ function App() {
   };
 
   const generateInvoice = async () => {
-    if (!isIOSDevice()) {
-      printInvoice();
-      return;
-    }
-
     try {
       setGeneratingPDF(true);
-      await buildPdfForIOS();
+      await buildInvoicePdf();
     } catch (err) {
       console.error('PDF error:', err);
       // Fallback — jangan tinggal pengguna tergantung
